@@ -1,10 +1,10 @@
-St st;
+/*St st;
 
 void setup() {
 	size(800, 600);
 
 	st = new St( ez_ellipse(400, 200, 400, 300) );
-	// st.ease = Ez.EaseType.CUBIC;
+	//st.ease = Ez.EaseType.CUBIC;
 }
 
 void draw() {
@@ -39,4 +39,4 @@ void mouseClicked() {
 
 	st.then( next, 0.8 );
 
-}
+}*/

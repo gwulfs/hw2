@@ -77,7 +77,6 @@ class RoseChart{
     	float rad = radians(ang);
     	slices.clear();
     	for(int i = 0; i < categories.length; i++){
-    		println("Swag");
     		RoseSlice slice = new RoseSlice(rad);
     		slices.add(slice);
     	}

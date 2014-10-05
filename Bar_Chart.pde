@@ -19,6 +19,11 @@ class BarChart{
 
     public color [] colarray = null;
 
+    private St st;
+    public boolean inTransition = false;
+
+   // private int transCompleteTime = null;
+    private int numTransCompleted = 0;
 
     BarChart(int left, int bottom){
       bars = new ArrayList<Bar>();
@@ -73,6 +78,7 @@ class BarChart{
         xticks = inputLabels.length;
         dispWidth = width;
         dispHeight = height;
+        setBarLoc();
     }
     
     float getTickRange(float range, float numticks) {
@@ -116,13 +122,21 @@ class BarChart{
     }
   }
   
-  void drawData(int xleft, int xright, int ybottom, int ytop, float barWidth) {
+  void setBarLoc(){
+    int ybottom = height - offbottom;
+    int xleft = offleft;
+    int ytop = offtop;
+    int xright = width - offright;
+    float barWidth = ((xright - xleft)/bars.size()) * 0.5;
     for (int i = 0; i < bars.size(); i++) {
       bars.get(i).x = (((xright - xleft)/bars.size()) * (i)) + xleft;
       bars.get(i).y = ybottom - ((ybottom - ytop) * (bars.get(i).value/yupper));
       bars.get(i).barHeight = ybottom - bars.get(i).y;
       bars.get(i).barWidth = barWidth;
     }
+  }
+
+  void drawData() {
     for (int j = bars.size() - 1; j >= 0; j--) {
        bars.get(j).display();
     }
@@ -135,25 +149,62 @@ class BarChart{
 
   }
   void display(){
-        int ybottom = height - offbottom;
-        int xleft = offleft;
-        int ytop = offtop;
-        int xright = width - offright;
-        stroke(153);
-        strokeWeight(2);
-        //X-Axis
-        line(xleft, ybottom, xright, ybottom);
-        //Y-Axis
-        line(xleft, ybottom, xleft, ytop);
+    //println("display");
+    int ybottom = height - offbottom;
+    int xleft = offleft;
+    int ytop = offtop;
+    int xright = width - offright;
+    stroke(153);
+    strokeWeight(2);
+    //X-Axis
+    line(xleft, ybottom, xright, ybottom);
+    //Y-Axis
+    line(xleft, ybottom, xleft, ytop);
 
-        strokeWeight(1);
-        drawVerticals(xleft, xright, ybottom, ytop);
-        drawHorizontals(xleft, xright, ybottom, ytop);
-        writeLabels();
-        
-        float barWidth = ((xright - xleft)/bars.size()) * 0.5;
-        drawData(xleft, xright, ybottom, ytop, barWidth);
+    strokeWeight(1);
+    drawVerticals(xleft, xright, ybottom, ytop);
+    drawHorizontals(xleft, xright, ybottom, ytop);
+    writeLabels();
+    setBarLoc();
+    drawData();
+    if(inTransition){
+      if(!bars.get(bars.size() - 1).isTrans()){
+          endTransition();
+          inTransition = false;
+      }
+    }    
+  }
+
+
+    void transition(Data_Point [] points, float timeDelay){
+      inTransition = true;
+     // numTransCompleted = milli() + timeDelay * 1000;
+      for(int i = 0; i < bars.size(); i++){
+        float xpos = points[i].xpos;
+        float ypos = points[i].ypos;
+        float diam = points[i].diam;
+        color pcol = points[i].col;
+        bars.get(i).transition(ez_ellipse(xpos, ypos,diam,diam,pcol), timeDelay);
+      }
     }
+
+    void transition(PieSlice [] slices, float timeDelay){
+      inTransition = true;
+      for(int i = 0; i < bars.size(); i++){
+      /*  float xpos = slices[i].xpos;
+        float ypos = slices[i].ypos;
+        float diam = slices[i].diam;
+        color pcol = slices[i].col;
+        bars.get(i).transition(ez_ellipse(xpos, ypos,diam,diam,pcol), timeDelay);*/
+      }
+    }
+
+    void endTransition(){
+      for(int i = 0; i < bars.size(); i++){
+        bars.get(i).stopTransition();
+      }
+    }
+
 };
 
 

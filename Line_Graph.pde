@@ -10,6 +10,8 @@ class LineGraph {
   int yticks = 10;
   String xAxis = "L1";
   String yAxis = "L2";
+  boolean inTransition = false;
+  int linecolor = 153;
   
 
   LineGraph(int left, int bottom) {
@@ -48,6 +50,7 @@ class LineGraph {
     int[] yssorted = sort(ys);
     setYaxisbounds(ys);
     setXaxisbounds(xs);
+    setPointLoc();
   }
  
  
@@ -95,15 +98,20 @@ class LineGraph {
       for (int i = 0; i <= xticks; i++) {
         float value = i * xtickrange;
         float xpos = (xright - xleft) * (value/xupper);
+        float nextxpos = (xright - xleft) * (value + xtickrange/xupper);
         line(xleft + xpos, ybottom, xleft + xpos, ytop);
-        text(str(value), xleft + xpos, (height + ybottom)/2);
+        textAlign(CENTER);
+        text(categories[i], xleft + (xpos + nextxpos)/2, (height + ybottom)/2);
       }
     }
     else{
       for (int j = 0; j < categories.length; j++) {
         float xpos = ((xright - xleft)/categories.length) * (j);
+        float nextxpos = ((xright - xleft)/categories.length) * (j+1);
         line(xleft + xpos, ybottom, xleft + xpos, ytop);
-        text(categories[j], xleft + xpos, (height + ybottom)/2);
+        textAlign(CENTER);
+       text(categories[j], xleft + (xpos + nextxpos)/2, (height + ybottom)/2);
+        //text(categories[j], xleft + xpos, (height + ybottom)/2);
       }
     }
   }
@@ -117,11 +125,15 @@ class LineGraph {
       line(xleft, ybottom - ypos, xright, ybottom - ypos);
       float textw = textWidth(str(value));
       textAlign(CENTER,CENTER);
-      text(str(value), xleft - textw - 5, ybottom - ypos);
+      text(str(value), xleft - textw/2 - 5, ybottom - ypos);
     }
   }
 
-  void drawData(int xleft, int xright, int ybottom, int ytop, float pointWeight, float lineWeight) {
+  void setPointLoc(){
+    int ybottom = height - offbottom;
+    int xleft = offleft;
+    int ytop = offtop;
+    int xright = width - offright;
     float xpos_last = -1;
     float ypos_last = -1;
     for (int i = 0; i < points.length; i++) {
@@ -132,9 +144,17 @@ class LineGraph {
         points[i].xpos = (((xright - xleft)/categories.length) * (i)) + xleft;
       }
       points[i].ypos = ybottom - ((ybottom - ytop) * (points[i].y/yupper));
+    }
+
+  }
+
+  void drawData(int xleft, int xright, int ybottom, int ytop, float pointWeight, float lineWeight) {
+    float xpos_last = -1;
+    float ypos_last = -1;
+    for (int i = 0; i < points.length; i++) {
       if ( xpos_last != -1 && ypos_last != -1) {
         strokeWeight(lineWeight);
-        line( points[i].xpos, points[i].ypos, xpos_last, ypos_last);
+        line(points[i].xpos, points[i].ypos, xpos_last, ypos_last);
       }
       xpos_last = points[i].xpos;
       ypos_last = points[i].ypos;
@@ -168,18 +188,11 @@ class LineGraph {
   }
   
   void display() {
-    //int ybottom = height - offbottom;
-    //int ytop = offbottom/2;
-    //int xleft = offleft;
-    //int xright = int(width - (offleft/1.5));
     int ybottom = height - offbottom;
     int xleft = offleft;
-
-    //int ytop = offbottom/2;
     int ytop = offtop;
-
-    //int xright = int(width - (offleft/1.5));
     int xright = width - offright;
+
     stroke(153);
     strokeWeight(2);
     //X-Axis
@@ -190,10 +203,42 @@ class LineGraph {
     strokeWeight(1);
     drawVerticals(xleft, xright, ybottom, ytop);
     drawHorizontals(xleft, xright, ybottom, ytop);
-    
-    drawData(xleft, xright, ybottom, ytop, 4, 1);
-    
+    setPointLoc();
+    float lineWeight = 1;
+    if(inTransition){
+      lineWeight *= (1 - points[points.length - 1].transVal());
+    }
+    drawData(xleft, xright, ybottom, ytop, 4, lineWeight);  
     drawHoverData(mouseX, mouseY);
+    if(inTransition){
+      if(!points[points.length - 1].isTrans()){
+        endTransition();
+        inTransition = false;
+      }
+    }
+  }
+
+  void transition(ArrayList<Bar> bars, float timeDelay){
+      inTransition = true;
+     // numTransCompleted = milli() + timeDelay * 1000;
+      for(int i = 0; i < points.length; i++){
+        float xpos = bars.get(i).x;
+        float ypos = bars.get(i).y;
+        float w = bars.get(i).barWidth;
+        float h = bars.get(i).barHeight;
+        xpos = xpos + w/2;
+        ypos = ypos + h/2;
+        color bcol = bars.get(i).col;
+
+        points[i].transition(ez_rect(xpos, ypos,w,h,bcol), timeDelay);
+      }
+  }
+  
+  
+  void endTransition(){
+    for(int i = 0; i < points.length; i++){
+      points[i].stopTransition();
+    }
   }
   
 }//

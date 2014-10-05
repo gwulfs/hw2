@@ -6,23 +6,11 @@ BarChart bchart;
 PieChart pchart;
 RoseChart rchart;
 int modeChoice = 0; // 0 - Bar Chart, 1 - Line Graph, 3 - PieChart
+int nextMode; //indicator used in transitions
 
 RectButton toPie;
 RectButton toBar;
 RectButton toLine;
-
-/*color [] colors = { #9e0142,
-                    #d53e4f,
-                    #f46d43,
-                    #fdae61,
-                    #fee08b,
-                    #ffffbf,
-                    #e6f598,
-                    #abdda4,
-                    #66c2a5,
-                    #3288bd,
-                    #5e4fa2
-                  };*/
 
 color [] colors = { 
                     #9D9D9D,
@@ -44,9 +32,8 @@ color [] colors = {
 
 
 int headerHeight = 50;
-
-String buttText = "Toggle Mode";
 PFont f;   
+boolean inTransition = false;
 
 void setup() {
   size(640, 480);
@@ -72,6 +59,16 @@ void draw() {
   textAlign(LEFT);
   drawHeader();
   fill(0);
+  if(inTransition){
+    boolean isChartTrans = true;
+    if(modeChoice == 0){ isChartTrans = bchart.inTransition;}
+    else if(modeChoice == 1){isChartTrans = lgraph.inTransition;}
+    else{isChartTrans = pchart.inTransition;}
+    if(!isChartTrans){
+      inTransition = false;
+      modeChoice = nextMode;
+    }
+  }
   if(modeChoice == 0){bchart.display();}
   else if(modeChoice == 1){lgraph.display();}
   else{pchart.display();}
@@ -117,7 +114,6 @@ void initButtons(){
   toLine.buttText = "Line Graph";
   toPie = new RectButton(2*buttWidth + 30, 5, buttWidth, headerHeight - 10, #0078E7, #0C52CE);
   toPie.buttText = "Pie Chart";
-
 }
 
 void drawButtons(){
@@ -127,9 +123,33 @@ void drawButtons(){
 }
 
 void mousePressed() {
-  if(toBar.over()){modeChoice = 0;}
-  else if(toLine.over()){modeChoice = 1;}
-  else if(toPie.over()){modeChoice = 2;}
+  if(modeChoice == 0){
+    if(toLine.over()){bar2line();}
+    else if(toPie.over()){modeChoice = 2;}
+  }
+  else if(modeChoice == 1){
+    if(toBar.over()){line2bar();}
+    else if(toPie.over()){modeChoice = 2;}
+  }
+  else if(modeChoice == 2){
+    if(toBar.over()){modeChoice = 0;}
+    if(toLine.over()){modeChoice = 1;}
+  }
+}
+
+void bar2line(){
+  inTransition = true;
+  nextMode = 1;
+  Data_Point[] points = lgraph.points;
+  bchart.transition(points, 2);
+}
+
+
+void line2bar(){
+  inTransition = true;
+  nextMode = 0;
+  ArrayList<Bar> bars = bchart.bars;
+  lgraph.transition(bars, 2);
 }
 
 

@@ -22,7 +22,7 @@ class PieChart{
     private ArrayList <PieSlice> slices;
 
     public color [] colarray = null;
-
+    public boolean inTransition = false;
 
     PieChart(int left, int bottom){
       offleft = left;

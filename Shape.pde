@@ -93,7 +93,19 @@ public Shape ez_rect(float center_x, float center_y, float w, float h) {
 		s.vertecies.add( new Vertex(-w/2.0, h/2.0) );
 
 		return s;
-	}
+}
+public Shape ez_rect(float center_x, float center_y, float w, float h, color col) {
+		Shape s = new Shape();
+		s.x = center_x;
+		s.y = center_y;
+		s.fill = col;
+		s.vertecies.add( new Vertex(-w/2.0, -h/2.0) );
+		s.vertecies.add( new Vertex(w/2.0, -h/2.0) );
+		s.vertecies.add( new Vertex(w/2.0, h/2.0) );
+		s.vertecies.add( new Vertex(-w/2.0, h/2.0) );
+
+		return s;
+}
 
 public Shape ez_ellipse(float center_x, float center_y, float w, float h) {
 	// Approximating a circle using Bezier curves: http://www.whizkidtech.redprince.net/bezier/circle/
@@ -101,6 +113,31 @@ public Shape ez_ellipse(float center_x, float center_y, float w, float h) {
 	s.x = center_x;
 	s.y = center_y;
 
+	float kappa = 0.5522847498;
+	float h_rad = h/2.0, w_rad = w/2.0;
+	float horiz_controlPointDist = kappa * h_rad;
+	float vert_controlPointDist  = kappa * w_rad;
+
+	// top
+	s.vertecies.add( new Vertex(0, -h_rad));
+	// top-right
+	s.vertecies.add( new Vertex(w_rad,0, horiz_controlPointDist,-h_rad, w_rad,-vert_controlPointDist) );
+	// bottom-right
+	s.vertecies.add( new Vertex(0,h_rad, w_rad,vert_controlPointDist, horiz_controlPointDist,h_rad) );
+	// bottom-left
+	s.vertecies.add( new Vertex(-w_rad,0, -horiz_controlPointDist,h_rad, -w_rad,vert_controlPointDist) );
+	// top-left
+	s.vertecies.add( new Vertex(0,-h_rad, -w_rad,-vert_controlPointDist, -horiz_controlPointDist,-h_rad) );
+
+	return s;
+}
+
+public Shape ez_ellipse(float center_x, float center_y, float w, float h, color col) {
+	// Approximating a circle using Bezier curves: http://www.whizkidtech.redprince.net/bezier/circle/
+	Shape s = new Shape();
+	s.x = center_x;
+	s.y = center_y;
+	s.fill = col;
 	float kappa = 0.5522847498;
 	float h_rad = h/2.0, w_rad = w/2.0;
 	float horiz_controlPointDist = kappa * h_rad;

@@ -57,10 +57,12 @@ public class St {
 		else if (t == 1.0) end.draw();
 		else draw(t);
 	}
+	public float gett(){
+		return constrain( map(frameCount, startFrame, endFrame, 0, 1) , 0.0, 1.0);
+	}
 	public void draw(float t) {
 		pushMatrix();
 		pushStyle();
-
 		translate( Ez.ease(start.x, end.x, t, ease),
 				   Ez.ease(start.y, end.y, t, ease) );
 		rotate( Ez.ease(start.rotation, end.rotation, t, ease) );
